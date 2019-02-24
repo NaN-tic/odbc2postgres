@@ -28,9 +28,9 @@ table_count = len(tables)
 
 print("Table Count: %d" % table_count)
 
-pcur.execute("CREATE TABLE IF NOT EXISTS migration(date TIMESTAMP, "
+pcur.execute("CREATE TABLE IF NOT EXISTS odbc2postgres(date TIMESTAMP, "
     "action VARCHAR)")
-pcur.execute("INSERT INTO migration VALUES (NOW(), 'START')")
+pcur.execute("INSERT INTO odbc2postgres VALUES (NOW(), 'START')")
 pcon.commit()
 
 start = time.time()
@@ -106,7 +106,7 @@ for table in tables:
         records = cursor.fetchmany(limit)
 
 
-pcur.execute("INSERT INTO migration VALUES (NOW(), 'STOP')")
+pcur.execute("INSERT INTO odbc2postgres VALUES (NOW(), 'STOP')")
 pcon.commit()
 
 end = time.time()
