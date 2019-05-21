@@ -12,6 +12,7 @@ DEST_PASSWORD = ''
 
 SOURCE_DSN = ''
 SOURCE_UID = ''
+SOURCE_PASSWORD = ''
 
 EXCLUDES = []
 
@@ -20,7 +21,8 @@ pcon = psycopg2.connect(host=DEST_HOST, dbname=DEST_DB, user=DEST_USER,
     password=DEST_PASSWORD)
 pcur = pcon.cursor()
 
-connection = pyodbc.connect("DSN=%s;Uid=%s" % (SOURCE_DSN, SOURCE_UID))
+connection = pyodbc.connect("DSN=%s;Uid=%s;PWD=%s" % (SOURCE_DSN, SOURCE_UID,
+        SOURCE_PASSWORD))
 cursor = connection.cursor()
 cursor.execute("SELECT * FROM information_schema.tables")
 tables = [x[2] for x in cursor.fetchall()]
