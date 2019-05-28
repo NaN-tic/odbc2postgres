@@ -8,3 +8,7 @@ PostgreSQL server, probably located in remote host.
 The script also creates a "odbc2postgres" table where it records the start and end
 timestamps of the process. This way, you'll be able to monitor if the process
 has finished just by accessing the destintation PostgreSQL database.
+
+For "A3" software use "--exclude Ape_Pedidos_y_Ofertas"
+
+For "Navision" software use "--exclude xxx" (I can't remember the history table)

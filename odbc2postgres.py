@@ -4,28 +4,43 @@ from datetime import datetime
 from decimal import Decimal
 import psycopg2
 import sys
+import argparse
 
-DEST_HOST = ''
-DEST_DB = ''
-DEST_USER = ''
-DEST_PASSWORD = ''
+parser = argparse.ArgumentParser(description='Copies all tables and data from '
+    'an ODBC connection to a PostgreSQL database')
+parser.add_argument('--dest-host', dest='dest_host')
+parser.add_argument('--dest-database', dest='dest_database')
+parser.add_argument('--dest-user', dest='dest_user')
+parser.add_argument('--dest-password', dest='dest_password')
+parser.add_argument('--source-dsn', dest='source_dsn')
+parser.add_argument('--source-uid', dest='source_uid')
+parser.add_argument('--source-password', dest='source_password')
+parser.add_argument('--exclude', dest='exclude', nargs='+', default=[],
+    help='tables to be excluded')
+parser.add_argument('--include', dest='include', nargs='+', default=[],
+    help='tables to be included (all by default)')
 
-SOURCE_DSN = ''
-SOURCE_UID = ''
-SOURCE_PASSWORD = ''
+args = parser.parse_args()
 
-EXCLUDES = []
-
-
-pcon = psycopg2.connect(host=DEST_HOST, dbname=DEST_DB, user=DEST_USER,
-    password=DEST_PASSWORD)
+pcon = psycopg2.connect(host=args.dest_host, dbname=args.dest_database,
+    user=args.dest_user, password=args.dest_password)
 pcur = pcon.cursor()
 
-connection = pyodbc.connect("DSN=%s;Uid=%s;PWD=%s" % (SOURCE_DSN, SOURCE_UID,
-        SOURCE_PASSWORD))
+datasource = []
+if args.source_dsn:
+    datasource.append('DSN=%s' % args.source_dsn)
+if args.source_uid:
+    datasource.append('Uid=%s' % args.source_uid)
+if args.source_password:
+    datasource.append('PWD=%s' % args.source_password)
+connection = pyodbc.connect(';'.join(datasource))
+
 cursor = connection.cursor()
 cursor.execute("SELECT * FROM information_schema.tables")
-tables = [x[2] for x in cursor.fetchall()]
+if args.include:
+    tables = args.include
+else:
+    tables = [x[2] for x in cursor.fetchall()]
 table_count = len(tables)
 
 print("Table Count: %d" % table_count)
@@ -42,7 +57,7 @@ counter = 0
 for table in tables:
     counter += 1
     print('Table: "%s" (%s/%s)' % (table, counter, table_count))
-    if table in EXCLUDES:
+    if table in args.exclude:
         continue
 
     cursor.execute('SELECT count(*) FROM "%s"' % table)
